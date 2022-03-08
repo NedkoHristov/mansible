@@ -21,3 +21,6 @@ IaC provisioning is one of the mandatory steps of this repo, but the terraform w
 # Where you'll host the `marvin`
 
 As now it leaves on DigitalOcean and I'm still not 100% sure should I move it to my bare metal (named `vortex`) or some hybrid solution as LB on DigitalOcean behind with one VPS and the bare metal instance, but we all know that this is an absolute overkill (which means I'll probably do it :D)
+
+# CI/CD implementation
+Sure. Pushing to a tag version will trigger `molecule` tests and then an ansible deploy if there are any playbook changes. This will be handy when I add another website to `marvin` for example. Code linting and vulnerability scanning will be implemented too.
