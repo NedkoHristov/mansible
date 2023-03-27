@@ -8,7 +8,7 @@ The sole purpose is to automate my dear `marvin` to a much cleaner state as it i
 
 # Don't you like the ISPConfig?
 
-No.
+No. Some time ago I decided to make my life easier with a web panel where I can control my shit, but I hate every second of it. It's time to go vanilla Debian and Ansible (and containers, but it's a topic for another conversation).
 
 # What will be run on mansible
 
