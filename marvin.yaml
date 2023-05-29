@@ -1,0 +1,91 @@
+---
+- name: Server Setup
+  # hosts: marvin_ip
+  become: true
+  tasks:
+    - name: Update yum cache (CentOS/RHEL)
+      yum:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install EPEL repository (CentOS/RHEL)
+      yum:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Nginx (CentOS/RHEL)
+      yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start Nginx (CentOS/RHEL)
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install MySQL (CentOS/RHEL)
+      yum:
+        name: mysql-server
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start MySQL Service (CentOS/RHEL)
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install PHP and required extensions (CentOS/RHEL)
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - php-fpm
+        - php-mysqlnd
+        - php-mbstring
+        - php-xml
+        - php-curl
+        - php-gd
+      when: ansible_os_family == "RedHat"
+
+    - name: Restart PHP-FPM (CentOS/RHEL)
+      service:
+        name: php-fpm
+        state: restarted
+      when: ansible_os_family == "RedHat"
+
+    - name: Disable root SSH login
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+      notify: Restart SSH Service
+
+    - name: Install and configure firewalld (CentOS/RHEL)
+      yum:
+        name: firewalld
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Enable firewalld service
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Add firewall rules
+      firewalld:
+        service: "{{ item }}"
+        permanent: true
+        state: enabled
+        immediate: true
+      loop:
+        - ssh
+        - http
+        - https
+      when: ansible_os_family == "RedHat"
