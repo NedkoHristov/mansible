@@ -1,44 +1,49 @@
 ---
 - name: Server Setup
-  # hosts: marvin_ip
+  hosts: mansible
   become: true
   tasks:
     - name: Update yum cache (CentOS/RHEL)
       yum:
         update_cache: yes
-      when: ansible_os_family == "RedHat"
+
+    - name: Add user with sudo privileges
+      user:
+        name: nedko
+        password: "{{ 'someExtraStrongPassword' | password_hash('sha512', 'mysecretsalt') }}"
+        createhome: yes
+        shell: /bin/bash
+        groups: wheel
+        append: yes
+      become: true
+      become_method: sudo
 
     - name: Install EPEL repository (CentOS/RHEL)
       yum:
         name: epel-release
         state: present
-      when: ansible_os_family == "RedHat"
 
     - name: Install Nginx (CentOS/RHEL)
       yum:
         name: nginx
         state: present
-      when: ansible_os_family == "RedHat"
 
     - name: Start Nginx (CentOS/RHEL)
       service:
         name: nginx
         state: started
         enabled: yes
-      when: ansible_os_family == "RedHat"
 
     - name: Install MySQL (CentOS/RHEL)
       yum:
         name: mysql-server
         state: present
-      when: ansible_os_family == "RedHat"
 
     - name: Start MySQL Service (CentOS/RHEL)
       service:
         name: mysqld
         state: started
         enabled: yes
-      when: ansible_os_family == "RedHat"
 
     - name: Install PHP and required extensions (CentOS/RHEL)
       yum:
@@ -51,26 +56,23 @@
         - php-xml
         - php-curl
         - php-gd
-      when: ansible_os_family == "RedHat"
 
     - name: Restart PHP-FPM (CentOS/RHEL)
       service:
         name: php-fpm
         state: restarted
-      when: ansible_os_family == "RedHat"
 
-    - name: Disable root SSH login
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^PermitRootLogin'
-        line: 'PermitRootLogin no'
-      notify: Restart SSH Service
+    # - name: Disable root SSH login
+    #   lineinfile:
+    #     dest: /etc/ssh/sshd_config
+    #     regexp: "^PermitRootLogin"
+    #     line: "PermitRootLogin no"
+    #   notify: Restart SSH Service
 
     - name: Install and configure firewalld (CentOS/RHEL)
       yum:
         name: firewalld
         state: present
-      when: ansible_os_family == "RedHat"
 
     - name: Enable firewalld service
       systemd:
@@ -88,4 +90,3 @@
         - ssh
         - http
         - https
-      when: ansible_os_family == "RedHat"
